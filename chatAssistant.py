@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from openpyxl import load_workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import secret_keys
 
 
 load_dotenv()
