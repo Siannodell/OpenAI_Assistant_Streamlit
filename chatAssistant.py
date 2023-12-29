@@ -51,7 +51,7 @@ def upload_to_openai(filepath):
         response = openai.files.create(file=file.read(), purpose="assistants")
     return response.id
 
-api_key = secret_keys.openai_api_key
+api_key = st.secrets.OpenAIAPI.openai_api_key
 
 if api_key:
     openai.api_key = api_key
