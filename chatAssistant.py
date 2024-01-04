@@ -51,6 +51,9 @@ def upload_to_openai(filepath):
         response = openai.files.create(file=file.read(), purpose="assistants")
     return response.id
 
+#local
+#api_key = os.getenv("OPENAI_API_KEY")
+#git
 api_key = st.secrets.OpenAIAPI.openai_api_key
 
 if api_key:
