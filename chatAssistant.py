@@ -121,8 +121,7 @@ def process_message_with_citations(message):
     return full_response
 
 # Interface do chat
-st.title("Chat com o assistente da OpenAI")
-st.write("Este chat usa a API da OpenAI para gerar respostas.")
+st.title("Análise de Taxa de Conversão via ChatGPT")
 
 # Só vai mostrar o chat se for iniciado
 if st.session_state.start_chat:
