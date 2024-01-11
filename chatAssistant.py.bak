@@ -121,7 +121,7 @@ def process_message_with_citations(message):
     return full_response
 
 # Interface do chat
-st.title("Análise de Taxa de Conversão via ChatGPT")
+st.header("Análise de Taxa de Conversão via ChatGPT")
 
 # Só vai mostrar o chat se for iniciado
 if st.session_state.start_chat:

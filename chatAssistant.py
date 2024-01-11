@@ -28,7 +28,7 @@ if "start_chat" not in st.session_state:
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = None
 
-# titulo e icone da página
+
 # Função para converter XLSX pra PDF
 def convert_xlsx_to_pdf(input_path, output_path):
     workbook = load_workbook(input_path)
@@ -55,46 +55,43 @@ def upload_to_openai(filepath):
 #api_key = os.getenv("OPENAI_API_KEY")
 #git
 api_key = st.secrets.OpenAIAPI.openai_api_key
-
 if api_key:
     openai.api_key = api_key
 
-uploaded_file = st.sidebar.file_uploader("Envie um arquivo", key="file_uploader")
+uploaded_file = "Arquivo de Coeficiente de Aprovação STB.xlsx"
 
-if st.sidebar.button("Enviar arquivo"):
-    if uploaded_file:
-        # Converter XLSX para PDF
-        pdf_output_path = "converted_file.pdf"
-        convert_xlsx_to_pdf(uploaded_file, pdf_output_path)
 
-        # Enviar o arquivo convertido
-        additional_file_id = upload_to_openai(pdf_output_path)
-        
-        st.session_state.file_id_list.append(additional_file_id)
-        st.sidebar.write(f"ID do arquivo: {additional_file_id}")
+if uploaded_file:
+     # Converter XLSX para PDF
+    pdf_output_path = "converted_file.pdf"
+    convert_xlsx_to_pdf(uploaded_file, pdf_output_path)
+
+    # Enviar o arquivo convertido
+    additional_file_id = upload_to_openai(pdf_output_path)
+    
+    #salva sessão
+    st.session_state.file_id_list.append(additional_file_id)
+    fileId = additional_file_id
         
 # Mostra os ids
+file_id_list = []
 if st.session_state.file_id_list:
-    st.sidebar.write("IDs dos arquivos enviados:")
     for file_id in st.session_state.file_id_list:
-        st.sidebar.write(file_id)
+        file_id_list = file_id
         # Associa os arquivos ao assistente
         assistant_file = client.beta.assistants.files.create(
             assistant_id=assistant_id, 
             file_id=file_id
         )
 
-# Botão para iniciar o chat
-if st.sidebar.button("Iniciar chat"):
-    # Check if files are uploaded before starting chat
-    if st.session_state.file_id_list:
-        st.session_state.start_chat = True
-        # Cria a thread e guarda o id na sessão
-        thread = client.beta.threads.create()
-        st.session_state.thread_id = thread.id
-        st.write("id da thread: ", thread.id)
-    else:
-        st.sidebar.warning("Por favor, selecione pelo menos um arquivo para iniciar o chat")
+    # Verifica se o arquivo foi upado antes de iniciar
+if st.session_state.file_id_list:
+    st.session_state.start_chat = True
+
+    # Cria a thread e guarda o id na sessão
+    thread = client.beta.threads.create()
+    st.session_state.thread_id = thread.id
+    st.write("id da thread: ", thread.id)
 
 # Define a função para iniciar
 def process_message_with_citations(message):
@@ -112,7 +109,7 @@ def process_message_with_citations(message):
             cited_file = {'filename': 'cited_document.pdf'}  # Substituído pelo arquivo retornado
             citations.append(f'[{index + 1}] {file_citation.quote} from {cited_file["filename"]}')
         elif (file_path := getattr(annotation, 'file_path', None)):
-            # Placeholder for file download citation
+            # Placeholder
             cited_file = {'filename': 'downloaded_document.pdf'}  # Substituído pelo arquivo retornado
             citations.append(f'[{index + 1}] Click [here](#) to download {cited_file["filename"]}')  # Link de download substituído pelo caminho do arquivo
 
@@ -121,7 +118,7 @@ def process_message_with_citations(message):
     return full_response
 
 # Interface do chat
-st.header("Análise de Taxa de Conversão via ChatGPT")
+st.header("Análise de Coeficiente de Aprovação via ChatGPT")
 
 # Só vai mostrar o chat se for iniciado
 if st.session_state.start_chat:
@@ -143,7 +140,7 @@ if st.session_state.start_chat:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Adiciona as mensagens na thread
+        # Adiciona as mensagens criadas na thread
         client.beta.threads.messages.create(
             thread_id=st.session_state.thread_id,
             role="user",
@@ -154,7 +151,7 @@ if st.session_state.start_chat:
         run = client.beta.threads.runs.create(
             thread_id=st.session_state.thread_id,
             assistant_id=assistant_id,
-            instructions="Por favor, responda as perguntas usando o conteúdo do arquivo. Quando adicionar informações externas, seja claro e mostre essas informações em outra cor."
+            instructions="Você vai analisar o arquivo enviado e dar respostas objetivas sobre coeficiente de aprovação de um ecommerce. Neste arquivo tem informações de pedidos por período e localidade. Por favor responda de maneira clara."
         )
 
         # Pedido para finalizar a requisição e retornar as mensagens do assistente
